@@ -7,74 +7,117 @@ public class BackgroundManager : MonoBehaviour
     [Header("Backgrounds")]
     public GameObject[] backgrounds;
 
-    public float nextPlatformZ = 50f; //This variable is required in order to show the next platform on top of the other in the Z plane
+    [Header("Z position between platforms")]
+    public float nextPlatformZ = 30f; //This variable is required in order to show the next platform on top of the other in the Z plane
+
+    [Header("Distance Between new Backgrounds")]
+    public float backgroundX = 200f;
+    public float nextBackgroundX = 250f;
+
+    [Header("Speed of the parallax Background")]
+    public const float parallaxSpeed = 1.3f;
 
     private PlayerController thePlayer;
     private int previousNumber;
     private int nextNumber;
-    public float backGroundChangeVariable = 500f;
+
+    private float backgroundZ = 900f;
+    private float changePoint;
+
     // Start is called before the first frame update
     void Start()
     {
         thePlayer = FindObjectOfType<PlayerController>();
-        nextNumber = 1;
         previousNumber = 0;
+        nextNumber = previousNumber + 1;
         backgrounds[nextNumber].SetActive(true);
-        backgrounds[nextNumber].transform.position = new Vector3(backGroundChangeVariable, backgrounds[nextNumber].transform.position.y, backgrounds[previousNumber].transform.position.z - nextPlatformZ);
+        backgroundZ -= nextPlatformZ;
+        backgrounds[nextNumber].transform.position = new Vector3(backgroundX, backgrounds[nextNumber].transform.position.y, backgroundZ);
+
+        FindNextBackgroundStartingPoint();
 
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        BackgroundChange();
-    }
-
-    public void BackgroundChange()
-    {
-
-        if (nextNumber < 4)
-        {
-            if (nextNumber == 1)
-            {
-                if (thePlayer.transform.position.x + 50f >= backgrounds[nextNumber].transform.position.x)
-                {
-                    LinearBackgroundChange();
-                }
-            }
-            else if (thePlayer.transform.position.x >= backgrounds[nextNumber].transform.position.x)
-            {
-                LinearBackgroundChange();
-            }
-        }
+        LinearBackgroundChange();
     }
 
     void LinearBackgroundChange()
     {
-        //disable the script that allows scrolling behaviour
-        foreach (ScrollingBackground scrollingBackground in backgrounds[previousNumber].GetComponentsInChildren<ScrollingBackground>())
+        if (backgroundZ >= 30)
         {
-            if (scrollingBackground.isActiveAndEnabled)
+
+            if (thePlayer.transform.position.x >= changePoint)
             {
-                scrollingBackground.enabled = false;
+                //enable the script that allows scrolling behaviour in the current object
+                foreach (ScrollingBackground scrollingBackground in backgrounds[nextNumber].GetComponentsInChildren<ScrollingBackground>())
+                {
+                    if (!scrollingBackground.isActiveAndEnabled)
+                    {
+                        scrollingBackground.enabled = true;
+                        scrollingBackground.parallaxSpeed = parallaxSpeed;
+                    }
+                }
+
+                //disable the script that allows scrolling behaviour
+                foreach (ScrollingBackground scrollingBackground in backgrounds[previousNumber].GetComponentsInChildren<ScrollingBackground>())
+                {
+                    if (scrollingBackground.isActiveAndEnabled)
+                    {
+                        scrollingBackground.enabled = false;
+                        scrollingBackground.parallaxSpeed = 0f;
+
+                    }
+                }
+
+                backgrounds[previousNumber].SetActive(false);
+
+                previousNumber = nextNumber;
+                nextNumber++;
+
+                if(nextNumber > 3)
+                {
+                    nextNumber = 0;
+                }
+
+                backgroundX += nextBackgroundX;
+                backgrounds[nextNumber].transform.position = new Vector3(backgroundX, backgrounds[nextNumber].transform.position.y, backgrounds[previousNumber].transform.position.z - nextPlatformZ);
+                backgrounds[nextNumber].SetActive(true);
+
+                FindNextBackgroundStartingPoint();
             }
         }
 
-        backgrounds[previousNumber].SetActive(false);
+    }
+    void FindNextBackgroundStartingPoint()
+    {
 
-        //enable the script that allows scrolling behaviour in the current object
-        foreach (ScrollingBackground scrollingBackground in backgrounds[nextNumber].GetComponentsInChildren<ScrollingBackground>())
+        List<Transform> backgroundTransforms = new List<Transform>();
+        changePoint = Mathf.Infinity;
+
+        foreach (Transform child in backgrounds[nextNumber].GetComponentsInChildren<Transform>())
         {
-            if (!scrollingBackground.isActiveAndEnabled)
+            if (child.name.Equals("Background"))
             {
-                scrollingBackground.enabled = true;
+                foreach (Transform backgroundTrans in child)
+                {
+                    backgroundTransforms.Add(backgroundTrans);
+                }
+                break;
             }
         }
 
-        previousNumber = nextNumber;
-        nextNumber++;
+        foreach (Transform back in backgroundTransforms)
+        {
+            if (back.position.x < changePoint)
+            {
+                changePoint = back.position.x;
+            }
+        }
 
-        backgrounds[nextNumber].SetActive(true);
-        backgrounds[nextNumber].transform.position = new Vector3(backgrounds[previousNumber].transform.position.x + backGroundChangeVariable, backgrounds[nextNumber].transform.position.y, backgrounds[previousNumber].transform.position.z - nextPlatformZ);
+        Debug.Log(changePoint);
+
     }
 }

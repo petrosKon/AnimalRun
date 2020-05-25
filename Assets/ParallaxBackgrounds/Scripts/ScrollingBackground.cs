@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ public class ScrollingBackground : MonoBehaviour {
 		leftIndex = 0;
 		rightIndex = layers.Length - 1;
 	}
-	void Update(){
+	void FixedUpdate(){
 
 		float deltaX = cameraTransform.position.x - lastCameraX;
 		transform.position += Vector3.right * (deltaX * parallaxSpeed);
@@ -65,5 +66,30 @@ public class ScrollingBackground : MonoBehaviour {
 		if(rightIndex == layers.Length -1){
 			leftIndex = 0;
 		}	
+	}
+
+	//prevents from going out of when enabled
+	private void OnEnable()
+	{
+		try
+		{
+			float deltaX = cameraTransform.position.x - lastCameraX;
+			transform.position += Vector3.right * (deltaX * parallaxSpeed);
+			lastCameraX = cameraTransform.position.x;
+
+			if (cameraTransform.position.x < (layers[leftIndex].transform.position.x + viewZone))
+			{
+				scrollLeft();
+			}
+			if (cameraTransform.position.x > (layers[leftIndex].transform.position.x + viewZone))
+			{
+				scrollRight();
+			}
+
+		} catch(NullReferenceException e)
+		{
+			Debug.LogError(e);
+		}
+		
 	}
 }
