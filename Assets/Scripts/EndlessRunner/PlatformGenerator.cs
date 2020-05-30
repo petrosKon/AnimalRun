@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class PlatformGenerator : MonoBehaviour
 {
-    /*[Header("Platform")]
-    public GameObject[] thePlatforms;*/
-
     [Header("Generation Point")]
     public Transform generationPoint;
 
@@ -110,11 +107,15 @@ public class PlatformGenerator : MonoBehaviour
 
                 float enemyXPos = Random.Range(-platformWidths[platformSelector] / 3, platformWidths[platformSelector] / 3);
 
-                Vector3 enemyPos = new Vector3(enemyXPos, 0.5f, 0f);
-                if (Physics.Raycast(new Vector3(enemyXPos, 9999f, 0f), Vector3.down, out RaycastHit hit, Mathf.Infinity))
-                {
-                    enemyPos = new Vector3(enemyXPos, hit.point.y + 0.5f, 0f);
+                Vector3 enemyPos = new Vector3();
 
+                if (!newEnemy.name.Equals("EnemyBird(Clone)"))
+                {
+                    enemyPos = new Vector3(enemyXPos, 0.5f, 0f);
+                }
+                else
+                {
+                    enemyPos = new Vector3(enemyXPos, 3f, 0f);
                 }
 
                 newEnemy.transform.position = transform.position + enemyPos;
@@ -143,9 +144,9 @@ public class PlatformGenerator : MonoBehaviour
                 }
             }
 
-        transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2),
-        transform.position.y,
-        transform.position.z);
+            transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2),
+            transform.position.y,
+            transform.position.z);
 
             // Instantiate(thePlatforms[platformSelector],transform.position,transform.rotation);
         }

@@ -38,7 +38,7 @@ public class DisplayHighscores : MonoBehaviour
         while (true)
         {
             highscoreManager.DownloadHighscores();
-            yield return new WaitForSeconds(30);
+            yield return new WaitForSeconds(5);
         }
     }
 }

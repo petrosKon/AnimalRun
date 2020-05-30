@@ -100,7 +100,7 @@ public class PowerUpManager : MonoBehaviour
 
             for (int i = 0; i < enemyList.Length; i++)
             {
-                if (enemyList[i].name.Contains("Cactus") || enemyList[i].name.Contains("Spikes") || enemyList[i].name.Contains("WoodTrap"))
+                if (enemyList[i].name.Contains("Cactus") || enemyList[i].name.Contains("Spikes") || enemyList[i].name.Contains("WoodTrap") || enemyList[i].name.Contains("EnemyBird"))
                 {
                     enemyList[i].gameObject.SetActive(false);
                 }
