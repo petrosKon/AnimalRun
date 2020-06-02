@@ -101,38 +101,49 @@ public class PlatformGenerator : MonoBehaviour
             newPlatform.SetActive(true);
             //Debug.Log(newPlatform.transform.position);
 
-            if (Random.Range(0f, 100f) < randomEnemyThreshold)
+            //prevents spawn on small platforms
+            if(!newPlatform.name.Contains("3") && !newPlatform.name.Contains("4"))
             {
-                GameObject newEnemy = enemiesPool[Random.Range(0, enemiesPool.Length)].GetPooledObject();
-
-                float enemyXPos = Random.Range(-platformWidths[platformSelector] / 3, platformWidths[platformSelector] / 3);
-
-                Vector3 enemyPos = new Vector3();
-
-                if (!newEnemy.name.Equals("EnemyBird(Clone)"))
+                if (Random.Range(0f, 100f) < randomEnemyThreshold)
                 {
-                    enemyPos = new Vector3(enemyXPos, 0.5f, 0f);
+                    GameObject newEnemy = enemiesPool[Random.Range(0, enemiesPool.Length)].GetPooledObject();
+
+                    float enemyXPos = Random.Range(-platformWidths[platformSelector] / 3, platformWidths[platformSelector] / 3);
+
+                    Vector3 enemyPos = new Vector3();
+
+                    if (!newEnemy.name.Equals("EnemyBird(Clone)"))
+                    {
+                        enemyPos = new Vector3(enemyXPos, 0.5f, 0f);
+                    }
+                    else
+                    {
+                        enemyPos = new Vector3(enemyXPos, 3f, 0f);
+                    }
+
+                    newEnemy.transform.position = transform.position + enemyPos;
+                    newEnemy.transform.rotation = transform.rotation;
+                    newEnemy.SetActive(true);
+
+                    //prevents pickups from spawning inside enemies!!!
+                    if (Random.Range(0f, 100f) < randomPickUpsThreshold)
+                    {
+                        List<GameObject> pickups = thePickUpGenerator.SpawnPickups(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z));
+
+                        foreach (GameObject pickup in pickups)
+                        {
+                            if (pickup.GetComponent<BoxCollider2D>().bounds.Intersects(newEnemy.GetComponent<BoxCollider2D>().bounds))
+                            {
+                                pickup.SetActive(false);
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    enemyPos = new Vector3(enemyXPos, 3f, 0f);
-                }
-
-                newEnemy.transform.position = transform.position + enemyPos;
-                newEnemy.transform.rotation = transform.rotation;
-                newEnemy.SetActive(true);
-
-                //prevents pickups from spawning inside enemies!!!
-                if (Random.Range(0f, 100f) < randomPickUpsThreshold)
-                {
-                    List<GameObject> pickups = thePickUpGenerator.SpawnPickups(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z));
-
-                    foreach (GameObject pickup in pickups)
+                    if (Random.Range(0f, 100f) < randomPickUpsThreshold)
                     {
-                        if (pickup.GetComponent<BoxCollider2D>().bounds.Intersects(newEnemy.GetComponent<BoxCollider2D>().bounds))
-                        {
-                            pickup.SetActive(false);
-                        }
+                        thePickUpGenerator.SpawnPickups(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z));
                     }
                 }
             }
@@ -143,6 +154,7 @@ public class PlatformGenerator : MonoBehaviour
                     thePickUpGenerator.SpawnPickups(new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z));
                 }
             }
+           
 
             transform.position = new Vector3(transform.position.x + (platformWidths[platformSelector] / 2),
             transform.position.y,
